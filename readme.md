@@ -10,17 +10,17 @@ sudo mv ./kubectl /usr/local/bin/kubectl
 kubectl version --client
 
 ### Export variabel yang nanti akan dibutuhkan  ###
-export bucket_name=<S3 bucket that already created>
-export KOPS_CLUSTER_NAME=<cluster name>
-export KOPS_STATE_STORE=s3://${bucket_name}
+`export bucket_name=<S3 bucket that already created>`
+`export KOPS_CLUSTER_NAME=<cluster name>`
+`export KOPS_STATE_STORE=s3://${bucket_name}`
 
 ### Create cluster ###
-kops create cluster --zones=ap-southeast-1a --node-count=3 --master-count=1 --node-size=t2.micro --master-size=t2.medium --name=${KOPS_CLUSTER_NAME} --ssh-public-key=~/.ssh/id_rsa.pub
+`kops create cluster --zones=ap-southeast-1a --node-count=3 --master-count=1 --node-size=t2.micro --master-size=t2.medium --name=${KOPS_CLUSTER_NAME} --ssh-public-key=~/.ssh/id_rsa.pub`
 
 
-kops update cluster --name ${KOPS_CLUSTER_NAME} --yes --admin
-kops validate cluster --wait 10m
-kubectl get nodes --show-labels
+`kops update cluster --name ${KOPS_CLUSTER_NAME} --yes --admin`
+`kops validate cluster --wait 10m`
+`kubectl get nodes --show-labels`
 
 ### Install Ingress ###
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.27.1/deploy/static/mandatory.yaml
@@ -32,33 +32,35 @@ cd ingress-nginx/deploy/static/provider/aws/
 kubectl apply -f deploy.yaml
 
 ### Create namespace ###
-kubectl create namespace wp-staging
-kubectl create namespace pesbuk-staging
-kubectl create namespace landing-page-staging
-kubectl create namespace wp-production
-kubectl create namespace pesbuk-production
-kubectl create namespace landing-page-production
+`kubectl create namespace wp-staging`
+`kubectl create namespace pesbuk-staging`
+`kubectl create namespace landing-page-staging`
+`kubectl create namespace wp-production`
+`kubectl create namespace pesbuk-production`
+`kubectl create namespace landing-page-production`
 
 ### Install Certificate Authority ###
-snap install helm --classic
-ln -s /snap/bin/helm /usr/local/bin/helm
-kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.14.3/cert-manager.crds.yaml
-kubectl create namespace cert-manager
-helm repo add jetstack https://charts.jetstack.io
-helm repo update
-helm --version
-helm install cert-manager --namespace cert-manager --version v0.14.3 jetstack/cert-manager
-kubectl get pods --namespace cert-manager
+`snap install helm --classic
+ln -s /snap/bin/helm /usr/local/bin/helm`
+
+`kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.14.3/cert-manager.crds.yaml`
+
+`kubectl create namespace cert-manager`
+`helm repo add jetstack https://charts.jetstack.io`
+`helm repo update`
+`helm --version`
+`helm install cert-manager --namespace cert-manager --version v0.14.3 jetstack/cert-manager`
+`kubectl get pods --namespace cert-manager`
 
 ### Deploy landing page ###
-kubectl apply -f landingpage/landing-page-production.yml
-kubectl apply -f landingpage/landing-page-staging.yml
+`kubectl apply -f landingpage/landing-page-production.yml`
+`kubectl apply -f landingpage/landing-page-staging.yml`
 
 ### Deploy pesbuk ###
-kubectl apply -f pesbuk/pesbuk-production.yml
-kubectl apply -f pesbuk/pesbuk-staging.yml
+`kubectl apply -f pesbuk/pesbuk-production.yml`
+`kubectl apply -f pesbuk/pesbuk-staging.yml`
 
 ### Deploy pesbuk ###
-kubectl apply -f wordpress/wp-production.yml
-kubectl apply -f wordpress/wp-staging.yml
+`kubectl apply -f wordpress/wp-production.yml`
+`kubectl apply -f wordpress/wp-staging.yml`
 
