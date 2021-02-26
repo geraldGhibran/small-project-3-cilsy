@@ -1,0 +1,74 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
+metadata:
+  name: landing-page-staging
+  namespace: landing-page-staging
+spec:
+  acme:
+    # The ACME server URL
+    server: https://acme-v02.api.letsencrypt.org/directory
+    # Email address used for ACME registration
+    email: gerald.gunasha@gmail.com
+    # Name of a secret used to store the ACME account private key
+    privateKeySecretRef:
+      name: landing-page-staging
+    # Enable the HTTP-01 challenge provider
+    solvers:
+      - selector: {}
+        http01:
+          ingress:
+            class: nginx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: landing-page-staging
+  namespace: landing-page-staging
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      name: landing-page-staging
+  template:
+    metadata:
+      labels:
+        name: landing-page-staging
+    spec:
+      containers:
+        - name: landing-page-staging
+          image: vanillavladimir/landing_page
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: landing-page-staging
+  namespace: landing-page-staging
+spec:
+  #type: LoadBalancer
+  ports:
+    - port: 80
+  selector:
+    name: landing-page-staging
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: landing-page-ingress
+  namespace: landing-page-staging
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/issuer: "landing-page-staging"
+spec:
+  rules:
+    - host: landingpage.staging.vladgerald.tech
+      http:
+        paths:
+          #- path: /belajar
+          - backend:
+              serviceName: landing-page-staging
+              servicePort: 80
+  tls:
+    - hosts:
+        - landingpage.staging.vladgerald.tech
+      secretName: landing-page-tls

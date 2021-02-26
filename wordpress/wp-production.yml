@@ -1,0 +1,106 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
+metadata:
+  name: wp-production
+  namespace: wp-production
+spec:
+  acme:
+    # The ACME server URL
+    server: https://acme-v02.api.letsencrypt.org/directory
+    # Email address used for ACME registration
+    email: gerald.gunasha@gmail.com
+    # Name of a secret used to store the ACME account private key
+    privateKeySecretRef:
+      name: wp-production
+    # Enable the HTTP-01 challenge provider
+    solvers:
+      - selector: {}
+        http01:
+          ingress:
+            class: nginx
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: wpsecret
+type: Opaque
+data:
+  DB_USER: cm9vdA==
+  DB_PASS: bWFzdWthamE=
+  DB_HOST: ZGJnZXJhbGQuY3V3d2pweTBsaDY1LmFwLXNvdXRoZWFzdC0xLnJkcy5hbWF6b25hd3MuY29t
+  DB_NAME: d29yZHByZXNz
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wp-production
+  namespace: wp-production
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: wp-production
+  template:
+    metadata:
+      labels:
+        name: wp-production
+    spec:
+      containers:
+        - name: wp-production
+          image: 978798257904.dkr.ecr.ap-southeast-1.amazonaws.com/wpadmin
+          env:
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: wpsecret
+                  key: DB_HOST
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: wpsecret
+                  key: DB_NAME
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: wpsecret
+                  key: DB_USER
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: wpsecret
+                  key: DB_PASS
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wp-production
+  namespace: wp-production
+spec:
+  #type: LoadBalancer
+  ports:
+    - port: 80
+  selector:
+    name: wp-production
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: wp-production-ingress
+  namespace: wp-production
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/issuer: "wp-production"
+spec:
+  rules:
+    - host: wp.production.vladgerald.tech
+      http:
+        paths:
+          #- path: /belajar
+          - backend:
+              serviceName: wp-production
+              servicePort: 80
+  tls:
+    - hosts:
+        - wp.production.vladgerald.tech
+      secretName: wp-production-tls

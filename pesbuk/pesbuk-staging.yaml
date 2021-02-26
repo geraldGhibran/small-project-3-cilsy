@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pesbuk-staging
+  namespace: pesbuk-staging
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      name: pesbuk-staging
+  template:
+    metadata:
+      labels:
+        name: pesbuk-staging
+    spec:
+      containers:
+        - name: pesbuk-staging
+          image: vanillavladimir/pesbuk
+          env:
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: mysecret
+                  key: DB_HOST
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysecret
+                  key: DB_USER
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: mysecret
+                  key: DB_PASS
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pesbuk-staging
+  namespace: pesbuk-staging
+spec:
+  ports:
+    - port: 80
+  selector:
+    name: pesbuk-staging
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: pesbuk-staging-ingress
+  namespace: pesbuk-staging
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/issuer: "pesbuk-staging"
+spec:
+  rules:
+    - host: pesbuk.staging.vladgerald.tech
+      http:
+        paths:
+          #- path: /belajar
+          - backend:
+              serviceName: pesbuk-staging
+              servicePort: 80
+  tls:
+    - hosts:
+        - pesbuk.staging.vladgerald.tech
+      secretName: pesbuk-staging-tls
