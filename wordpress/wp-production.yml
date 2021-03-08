@@ -46,29 +46,29 @@ spec:
         name: wp-production
     spec:
       containers:
-        - name: wp-production
-          image: 978798257904.dkr.ecr.ap-southeast-1.amazonaws.com/wpadmin
-          env:
-            - name: DB_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: wpsecret
-                  key: DB_HOST
-            - name: DB_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: wpsecret
-                  key: DB_NAME
-            - name: DB_USER
-              valueFrom:
-                secretKeyRef:
-                  name: wpsecret
-                  key: DB_USER
-            - name: DB_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: wpsecret
-                  key: DB_PASS
+      - name: wp-production
+        image: 978798257904.dkr.ecr.ap-southeast-1.amazonaws.com/wpadmin
+        env:
+          - name: DB_HOST
+            valueFrom:
+              secretKeyRef:
+                name: wpsecret
+                key: DB_HOST
+          - name: DB_NAME
+            valueFrom:
+              secretKeyRef:
+                name: wpsecret
+                key: DB_NAME
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: wpsecret
+                key: DB_USER
+          - name: DB_PASS
+            valueFrom:
+              secretKeyRef:
+                name: wpsecret
+                key: DB_PASS
 ---
 apiVersion: v1
 kind: Service
