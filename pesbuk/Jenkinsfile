@@ -1,0 +1,30 @@
+env.DOCKER_REGISTRY = 'vanillavladimir'
+env.DOCKER_IMAGE_NAME = 'pesbuk-jenkins'
+node('master') {
+	stage('Clean Workspace') {
+      cleanWs()
+    }
+    stage('Git Pull from Github') {
+        sh "git clone https://github.com/geraldGhibran/small-project-3-cilsy.git"
+    }
+    stage('Build Docker Image') {
+        sh "cd small-project-3-cilsy/pesbuk/apps && docker build --build-arg APP_NAME=pesbuk -t $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME:${BUILD_NUMBER} ."   
+    }
+    stage('Push Docker Image to Dockerhub') {
+        sh "docker push $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME:${BUILD_NUMBER}"
+    }
+    stage('DeployTo Kubernetes Cluster') {
+        sh "kubectl delete namespace pesbuk-production"
+        sh "kubectl create namespace pesbuk-production"
+        sh "kubectl replace -f small-project-3-cilsy/pesbuk/pesbuk-production-ssl.yml --force"
+        sh'''cd small-project-3-cilsy/pesbuk && sed -i "50d" pesbuk-production.yml'''
+        sh'''cd small-project-3-cilsy/pesbuk && sed -i "49 a \'\\'        image: vanillavladimir/$DOCKER_IMAGE_NAME:${BUILD_NUMBER}" pesbuk-production.yml && sed -i "s/''//" pesbuk-production.yml'''
+        sh "cd small-project-3-cilsy/pesbuk && kubectl replace -f pesbuk-production.yml --force"
+   }
+    stage('Remove Docker Image') {
+        sh "docker rmi $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME:${BUILD_NUMBER}"   
+    }
+    stage('Clean Workspace') {
+      cleanWs()
+    }
+}
