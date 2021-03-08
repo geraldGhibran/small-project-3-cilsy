@@ -1,9 +1,6 @@
 env.DOCKER_REGISTRY = 'vanillavladimir'
 env.DOCKER_IMAGE_NAME = 'wpadmin'
 node('master') {
-	// stage('Clean Workspace') {
-    //   cleanWs()
-    // }
     stage('Git Pull from Github') {
         sh "git clone https://github.com/geraldGhibran/small-project-3-cilsy.git"
     }
@@ -14,7 +11,6 @@ node('master') {
         sh "docker push $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME:${BUILD_NUMBER}"
     }
     stage('DeployTo Kubernetes Cluster') {
-        // sh "kubectl delete namespace wp-production"
         sh "kubectl create namespace wp-production"
         sh "kubectl replace -f small-project-3-cilsy/wordpress/wp-secret.yaml --force -n wp-production"
         sh "kubectl replace -f small-project-3-cilsy/wordpress/wp-production-ssl.yml --force"
