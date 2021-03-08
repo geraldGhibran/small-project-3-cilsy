@@ -1,9 +1,9 @@
 env.DOCKER_REGISTRY = 'vanillavladimir'
 env.DOCKER_IMAGE_NAME = 'pesbuk-jenkins'
 node('master') {
-	stage('Clean Workspace') {
-      cleanWs()
-    }
+	// stage('Clean Workspace') {
+    //   cleanWs()
+    // }
     stage('Git Pull from Github') {
         sh "git clone https://github.com/geraldGhibran/small-project-3-cilsy.git"
     }
@@ -14,7 +14,7 @@ node('master') {
         sh "docker push $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME:${BUILD_NUMBER}"
     }
     stage('DeployTo Kubernetes Cluster') {
-        sh "kubectl delete namespace pesbuk-production"
+        // sh "kubectl delete namespace pesbuk-production"
         sh "kubectl create namespace pesbuk-production"
         sh "kubectl replace -f small-project-3-cilsy/pesbuk/pesbuk-production-ssl.yml --force"
         sh'''cd small-project-3-cilsy/pesbuk && sed -i "50d" pesbuk-production.yml'''
