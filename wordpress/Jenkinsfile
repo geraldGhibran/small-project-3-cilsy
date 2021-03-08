@@ -16,7 +16,7 @@ node('master') {
     stage('DeployTo Kubernetes Cluster') {
         // sh "kubectl delete namespace wp-production"
         sh "kubectl create namespace wp-production"
-        sh "kubectl replace -f small-project-3-cilsy/wordpress/wp-secret.yml --force -n wp-production"
+        sh "kubectl replace -f small-project-3-cilsy/wordpress/wp-secret.yaml --force -n wp-production"
         sh "kubectl replace -f small-project-3-cilsy/wordpress/wp-production-ssl.yml --force"
         sh'''cd small-project-3-cilsy/wordpress && sed -i "50d" wp-production.yml'''
         sh'''cd small-project-3-cilsy/wordpress && sed -i "49 a \'\\'        image: vanillavladimir/$DOCKER_IMAGE_NAME:${BUILD_NUMBER}" wp-production.yml && sed -i "s/''//" wp-production.yml'''
