@@ -1,9 +1,6 @@
 env.DOCKER_REGISTRY = 'vanillavladimir'
 env.DOCKER_IMAGE_NAME = 'landing_page'
 node('master') {
-	stage('Clean Workspace') {
-      cleanWs()
-    }
     stage('Git Pull from Github') {
         sh "git clone https://github.com/geraldGhibran/small-project-3-cilsy.git"
     }
@@ -14,7 +11,6 @@ node('master') {
         sh "docker push $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME:${BUILD_NUMBER}"
     }
     stage('DeployTo Kubernetes Cluster') {
-        sh "kubectl delete namespace landing-page-production"
         sh "kubectl create namespace landing-page-production"
         sh "kubectl replace -f small-project-3-cilsy/landingpage/landing-page-production-ssl.yml --force"
         sh'''cd small-project-3-cilsy/landingpage && sed -i "39d" landing-page-production.yml'''
@@ -23,5 +19,8 @@ node('master') {
    }
     stage('Remove Docker Image') {
         sh "docker rmi $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME:${BUILD_NUMBER}"   
+    }
+    stage('Clean Workspace') {
+      cleanWs()
     }
 }
