@@ -25,24 +25,24 @@ spec:
         name: pesbuk-production
     spec:
       containers:
-        - name: pesbuk-production
-          image: vanillavladimir/pesbuk
-          env:
-            - name: DB_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: pesbuksecret
-                  key: DB_HOST
-            - name: DB_USER
-              valueFrom:
-                secretKeyRef:
-                  name: pesbuksecret
-                  key: DB_USER
-            - name: DB_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: pesbuksecret
-                  key: DB_PASS
+      - name: pesbuk-production
+        image: vanillavladimir/pesbuk
+        env:
+          - name: DB_HOST
+            valueFrom:
+              secretKeyRef:
+                name: pesbuksecret
+                key: DB_HOST
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: pesbuksecret
+                key: DB_USER
+          - name: DB_PASS
+            valueFrom:
+              secretKeyRef:
+                name: pesbuksecret
+                key: DB_PASS
 ---
 apiVersion: v1
 kind: Service
