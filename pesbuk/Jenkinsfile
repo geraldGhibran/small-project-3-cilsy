@@ -11,7 +11,7 @@ node('master') {
         sh "docker push $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME:${BUILD_NUMBER}"
     }
     stage('DeployTo Kubernetes Cluster') {
-        sh "kubectl create namespace pesbuk-production"
+        sh "kubectl replace namespace pesbuk-production"
         sh "kubectl replace -f small-project-3-cilsy/pesbuk/pesbuk-secret.yml --force -n pesbuk-production"
         sh "kubectl replace -f small-project-3-cilsy/pesbuk/pesbuk-production-ssl.yml --force"
         sh'''cd small-project-3-cilsy/pesbuk && sed -i "29d" pesbuk-production.yml'''
